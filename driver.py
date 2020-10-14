@@ -1,5 +1,7 @@
 import RPi.GPIO as GPIO
 import datetime
+import json
+
 class rotaryDriver():
     def __init__(self, mode="driver"):
         self.count = 0
@@ -36,11 +38,14 @@ class rotaryDriver():
             self.hook_status = "up"
             self.inform("hook", "up")
 
-    def inform(self, switch, event):
+    def inform(self, switch, action):
         if self.mode == "testing":
-            print("Action detected: {} - {}".format(switch, event))
+            print("Action detected: {} - {}".format(switch, action))
         elif self.mode == "driver":
-            print("EVENT: SWITCH: {} - ACTION: {} - HOOK_STATUS: {}".format(switch, event, self.hook_status))
+            event = {"switch": switch, "action": action, "hook_status": self.hook_status}
+            print("EVENT: SWITCH: {} - ACTION: {} - HOOK_STATUS: {}".format(event["switch"],
+                                                                            event["action"],
+                                                                            event["hook_status"]))
 
 
 if __name__ == "__main__":
