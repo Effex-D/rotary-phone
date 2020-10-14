@@ -25,6 +25,7 @@ class rotaryDriver():
         self.count = 0
         self.mode = mode
         self.hook_status = "down"
+        self.dial_status = "closed"
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
@@ -52,8 +53,10 @@ class rotaryDriver():
         :param channel: Required by event definition, but unused.
         """
         if GPIO.input(13):
+            self.dial_status = "open"
             self.inform("dial", "open")
         else:
+            self.dial_status = "closed"
             self.inform("dial", "closed")
             if self.count == 0:
                 catch_0 = True # Little work around to nullify the 0 count from a closed dial. Not sure if required.
@@ -92,11 +95,14 @@ class rotaryDriver():
         if self.mode == "testing":
             print("Action detected: {} - {}".format(switch, action))
         elif self.mode == "driver":
-            event = {"switch": switch, "action": action, "hook_status": self.hook_status}
-            print("EVENT: SWITCH: {} - ACTION: {} - HOOK_STATUS: {}".format(event["switch"],
+            event = {"switch": switch,
+                     "action": action,
+                     "hook_status": self.hook_status,
+                     "dial_status": self.dial_status}
+            print("EVENT: SWITCH: {} - ACTION: {} - HOOK_STATUS: {} - DIAL_STATUS - {}".format(event["switch"],
                                                                             event["action"],
-                                                                            event["hook_status"]))
-
+                                                                            event["hook_status"],
+                                                                            event["dial_status"]))
 
 if __name__ == "__main__":
     tester = rotaryDriver()
