@@ -30,11 +30,7 @@ class rotaryDriver():
         GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.setup(13, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.add_event_detect(15, GPIO.RISING, callback=self.add_one, bouncetime=75)
-
-        #TODO: need to define the difference between the switch coming open and the switch closing. Probably in end
-        # count function.
         GPIO.add_event_detect(13, GPIO.BOTH, callback=self.end_count, bouncetime=200)
-
         GPIO.setup(11, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.add_event_detect(11, GPIO.BOTH, callback=self.hook_callback)
         message = input("Press enter to quit\n\n")
@@ -53,17 +49,19 @@ class rotaryDriver():
         """
         This waits for a switch event on pin 13 (dial opening/closing) and ends the count based on that.
 
-        Unfinished. Check todo above.
-
         :param channel: Required by event definition, but unused.
         """
-        if self.count == 0:
+        if GPIO.input(13):
             self.inform("dial", "open")
-        elif self.count == 10:
-            self.inform("rotary", "0")
         else:
-            self.inform("rotary", self.count)
-        self.count = 0
+            self.inform("dial", "closed")
+            if self.count == 0:
+                catch_0 = True # Little work around to nullify the 0 count from a closed dial. Not sure if required.
+            elif self.count == 10:
+                self.inform("rotary", "0")
+            else:
+                self.inform("rotary", self.count)
+            self.count = 0
 
     def hook_callback(self, channel):
         """
@@ -88,8 +86,8 @@ class rotaryDriver():
         I'll think about it.
 
         :param switch: Receives the switch that has been the target of the interaction. Either hook, dial, or rotary.
-        :param action: Receives an action. For hook, either "up" or "down". For dial, "open". For rotary, a number
-        between 0 and 9.
+        :param action: Receives an action. For hook, either "up" or "down". For dial, "open" or "closed. For rotary,
+        a number between 0 and 9.
         """
         if self.mode == "testing":
             print("Action detected: {} - {}".format(switch, action))
